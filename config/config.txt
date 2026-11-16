@@ -1,0 +1,1 @@
+fstlatency=128 fstdist=2 parryahead=1 parrystartup=333 parrydist=3 rolldist=4 parrykey=16 backstabrad=.75 backstabdist=1.4 backevaderad=.85 backevadedist=2 rollatkdist=3 rollatkrad=1.2 atkmult=1 ass=1 copyactionkey=89 bulletdodge=1 hitguard=1

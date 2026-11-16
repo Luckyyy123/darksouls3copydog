@@ -1,0 +1,15 @@
+The release build uses GCC 15.2.0 from MinGW-w64 / w64devkit.
+GCC runtime components are covered by their applicable GPL terms with the
+GCC Runtime Library Exception, version 3.1. These notices do not license
+Copydog or any game-derived data as a whole.
+
+GCC 15.2.0 source and accompanying notices:
+https://gcc.gnu.org/releases.html
+https://github.com/gcc-mirror/gcc/tree/releases/gcc-15.2.0
+
+Unmodified upstream texts are provided alongside this notice:
+GCC-COPYING3.txt (COPYING3)
+GCC-RUNTIME-EXCEPTION.txt (COPYING.RUNTIME)
+
+MinGW-w64 startup/runtime terms are provided separately in
+MinGW-w64-runtime.txt. The compiler toolchain itself is not distributed.

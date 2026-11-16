@@ -1,0 +1,106 @@
+#include "../src/phase_runtime.h"
+#include <stdio.h>
+
+static unsigned checks;
+#define CHECK(x) do { ++checks; if(!(x)){printf("FAIL line %d: %s\n",__LINE__,#x);return 1;} } while(0)
+
+int main(void)
+{
+    COPYDOG_PHASE_EPISODE e={0};
+    CHECK(!CopydogPhaseEpisodeSpent(&e));
+    CHECK(CopydogPhaseEpisodeObserve(&e,10,53250,16071010,1,"attackrightheavy1start",100));
+    CopydogPhaseEpisodeMarkSpent(&e);
+    CHECK(CopydogPhaseEpisodeSpent(&e));
+    CHECK(CopydogPhaseEpisodeObserve(&e,10,53250,16070000,1,"attackrightheavy1start",100));
+    CHECK(CopydogPhaseEpisodeSpent(&e));
+    CHECK(CopydogPhaseEpisodeObserve(&e,10,53250,16070000,1,"attackrightheavy1end",500));
+    CHECK(CopydogPhaseEpisodeSpent(&e)&&e.episodeStarted==100&&e.started==500);
+    CHECK(CopydogPhaseEpisodeObserve(&e,10,53250,16070000,1,"attackrightheavy1end",500));
+    CHECK(CopydogPhaseEpisodeSpent(&e));
+    CHECK(CopydogPhaseEpisodeObserve(&e,10,53250,16070000,1,"attackrightheavy2start",800));
+    CHECK(!CopydogPhaseEpisodeSpent(&e));
+    CopydogPhaseEpisodeMarkSpent(&e);
+    CHECK(CopydogPhaseEpisodeObserve(&e,10,53250,16070000,1,"attackrightheavy2end",900));
+    CHECK(CopydogPhaseEpisodeSpent(&e));
+    CHECK(CopydogPhaseEpisodeObserve(&e,10,53250,16070000,1,"attackrightheavy2end",1000));
+    CHECK(!CopydogPhaseEpisodeSpent(&e));
+    CopydogPhaseEpisodeMarkSpent(&e);
+    CHECK(CopydogPhaseEpisodeObserve(&e,10,53251,16070000,1,"attackrightheavy2end",1000));
+    CHECK(!CopydogPhaseEpisodeSpent(&e));
+    CopydogPhaseEpisodeMarkSpent(&e);
+    CHECK(CopydogPhaseEpisodeObserve(&e,11,53251,16070000,1,"attackrightheavy2end",1000));
+    CHECK(!CopydogPhaseEpisodeSpent(&e));
+    CopydogPhaseEpisodeMarkSpent(&e);
+    CHECK(CopydogPhaseEpisodeObserve(&e,11,53251,16060000,1,"attackrightheavy2end",1000));
+    CHECK(!CopydogPhaseEpisodeSpent(&e));
+    CopydogPhaseEpisodeMarkSpent(&e);
+    CHECK(CopydogPhaseEpisodeObserve(&e,11,53251,16060000,3,"attackbothheavy1start",1100));
+    CHECK(!CopydogPhaseEpisodeSpent(&e));
+    CopydogPhaseEpisodeMarkSpent(&e);
+    CHECK(CopydogPhaseEpisodeObserve(&e,11,53251,16060000,3,"attackbothheavy1end",1300));
+    CHECK(CopydogPhaseEpisodeSpent(&e));
+    CHECK(CopydogPhaseEpisodeObserve(&e,11,53251,16060000,3,"attackbothheavy2start",1400));
+    CopydogPhaseEpisodeMarkSpent(&e);
+    CHECK(CopydogPhaseEpisodeObserve(&e,11,53251,16060000,3,"attackbothheavy2end",1500));
+    CHECK(CopydogPhaseEpisodeSpent(&e));
+    CHECK(!CopydogPhaseEpisodeObserve(&e,11,53251,16060000,3,"idle",1600));
+    CHECK(!CopydogPhaseEpisodeSpent(&e));
+    CHECK(CopydogPhaseEpisodeObserve(&e,11,53251,16060000,3,"attackbothlight1",1700));
+    CopydogPhaseEpisodeMarkSpent(&e);
+    CHECK(CopydogPhaseEpisodeObserve(&e,11,53251,16060000,3,"attackbothlight1",1800));
+    CHECK(!CopydogPhaseEpisodeSpent(&e));
+    CHECK(CopydogPhaseEpisodeObserve(&e,11,53251,16060000,3,"attackbothheavy1start",UINT32_MAX-20));
+    CopydogPhaseEpisodeMarkSpent(&e);
+    CHECK(CopydogPhaseEpisodeObserve(&e,11,53251,16060000,3,"attackbothheavy1end",10));
+    CHECK(CopydogPhaseEpisodeSpent(&e));
+    CHECK(!CopydogPhaseHeavyContinuation(CopydogEarlyNameKind("attackbothheavy1start"),CopydogEarlyNameKind("attackbothheavy2end")));
+    CHECK(!CopydogPhaseHeavyContinuation(CopydogEarlyNameKind("attackrightheavy1start"),CopydogEarlyNameKind("attackbothheavy1end")));
+    CHECK(!CopydogPhaseEpisodeObserve(0,1,1,1,1,"attackrightlight1",0));
+    CHECK(!CopydogPhaseEpisodeObserve(&e,0,1,10000,1,"attackrightlight1",0));
+    CHECK(!CopydogPhaseEpisodeObserve(&e,1,1,10000,4,"attackrightlight1",0));
+
+    COPYDOG_PHASE_Q q={0};int low=-1,high=-1,source=-1;
+    CHECK(!CopydogPhaseQBounds(&q,&low,&high,&source)&&low==0&&high==0&&source==0);
+    CHECK(!CopydogPhaseQAdd(&q,100,113));
+    CHECK(CopydogPhaseQBind(&q,10,20080000,1,"parryleftstart"));
+    CHECK(CopydogPhaseQSeed(&q,2,22)&&q.count==0);
+    CHECK(CopydogPhaseQBounds(&q,&low,&high,&source)&&low==2&&high==22&&source==COPYDOG_PHASE_Q_HISTORICAL);
+    CHECK(CopydogPhaseQAdd(&q,100,111));
+    CHECK(!CopydogPhaseQAdd(&q,100,112)&&q.count==1);
+    CHECK(CopydogPhaseQAdd(&q,200,217));
+    CHECK(CopydogPhaseQBounds(&q,&low,&high,&source)&&source==COPYDOG_PHASE_Q_HISTORICAL);
+    CHECK(CopydogPhaseQAdd(&q,300,313));
+    CHECK(CopydogPhaseQBounds(&q,&low,&high,&source)&&low==11&&high==17&&source==COPYDOG_PHASE_Q_MEASURED);
+    CHECK(CopydogPhaseQBind(&q,10,20080000,1,"parryleftstart")&&q.count==3);
+    CHECK(!CopydogPhaseQAdd(&q,400,399)&&q.count==3);
+    CHECK(!CopydogPhaseQAdd(&q,400,601)&&q.count==3);
+    CHECK(CopydogPhaseQAdd(&q,400,600));
+    CHECK(CopydogPhaseQAdd(&q,500,500));
+    CHECK(CopydogPhaseQBounds(&q,&low,&high,&source)&&low==0&&high==200);
+    for(unsigned i=0;i<COPYDOG_PHASE_Q_SAMPLES;++i)CHECK(CopydogPhaseQAdd(&q,1000+i*100,1012+i*100));
+    CHECK(q.count==COPYDOG_PHASE_Q_SAMPLES);
+    CHECK(CopydogPhaseQBounds(&q,&low,&high,&source)&&low==12&&high==12);
+    CHECK(CopydogPhaseQBind(&q,10,20080010,1,"parryleftstart")&&q.count==0&&!q.hasSeed);
+    CHECK(!CopydogPhaseQBounds(&q,&low,&high,&source));
+    CHECK(CopydogPhaseQSeed(&q,2,22));
+    CHECK(CopydogPhaseQBind(&q,11,20080010,1,"parryleftstart")&&!q.hasSeed);
+    CHECK(CopydogPhaseQAdd(&q,UINT32_MAX-5,7)&&q.values[0]==13);
+    CHECK(CopydogPhaseQAdd(&q,100,113));
+    CHECK(!CopydogPhaseQBounds(&q,&low,&high,&source));
+    CHECK(CopydogPhaseQAdd(&q,200,213));
+    CHECK(CopydogPhaseQBounds(&q,&low,&high,&source)&&low==13&&high==13);
+    CHECK(CopydogPhaseQBind(&q,11,20080010,3,"parryrightstart")&&q.count==0);
+    CHECK(CopydogPhaseQSeed(&q,2,22));
+    CHECK(CopydogPhaseQBind(&q,11,20080010,3,"parryleftstart")&&!q.hasSeed);
+    CHECK(!CopydogPhaseQSeed(&q,-1,22));
+    CHECK(!CopydogPhaseQSeed(&q,23,22));
+    CHECK(!CopydogPhaseQSeed(&q,2,201));
+    CHECK(!CopydogPhaseQBounds(&q,0,&high,&source));
+    CHECK(!CopydogPhaseQBind(&q,11,20080010,3,"ParryRightStart")&&!q.initialized);
+    CHECK(!CopydogPhaseQBind(0,11,20080010,3,"parryrightstart"));
+    CHECK(!CopydogPhaseQBind(&q,0,20080010,3,"parryrightstart"));
+    CHECK(!CopydogPhaseQBind(&q,11,0,3,"parryrightstart"));
+    CHECK(!CopydogPhaseQBind(&q,11,20080010,0,"parryrightstart"));
+    printf("phase runtime: %u checks passed\n",checks);
+    return 0;
+}
